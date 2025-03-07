@@ -1,13 +1,20 @@
 import { styled } from "@mui/system";
 
-const RootContainer = styled("div")({
+const RootContainer = styled("div")(({ theme }) => ({
   minHeight: "100vh",
-  padding: "16px",
-  paddingTop: "64px",
   display: "flex",
   flexDirection: "column",
-  background: "radial-gradient(ellipse at 50% 50%, hsl(210, 36.80%, 92.50%), hsl(0, 40.70%, 94.70%))",
-  overflowY: "auto", // Allow vertical scrolling if content overflows
-});
+  alignItems: "center",
+  padding: "20px",
+  paddingTop: "64px",
+  background: "radial-gradient(ellipse at 50% 50%, hsl(210, 36%, 92%), hsl(0, 40%, 94%))",
+  overflowY: "auto", // Enables scrolling when content exceeds viewport height
+  transition: "all 0.3s ease-in-out",
+
+  [theme.breakpoints.down("md")]: {
+    padding: "10px", // Adjusts spacing for smaller screens
+    paddingTop: "50px",
+  },
+}));
 
 export default RootContainer;

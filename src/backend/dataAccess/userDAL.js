@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Admin = require("../models/Admin")
 
 // Create a new user
 const createUser = async (userData) => {
@@ -26,4 +27,9 @@ const updateUserById = async (id, updateData) => {
   return await User.findByIdAndUpdate(id, updateData, { new: true });
 };
 
-module.exports = { createUser, findUserByEmail, findUserById, getAllUsers, updateUserById };
+// Find admin by username
+const findAdminByUsername = async (username) => {
+  return await Admin.findOne({ username });
+};
+
+module.exports = { createUser, findUserByEmail, findUserById, getAllUsers, updateUserById, findAdminByUsername };

@@ -48,8 +48,8 @@ const ProfileAvatar = ({ userType }) => { // Receive userType as a prop
         <MenuItem onClick={() => handleMenuClick("/profile")}>Profile</MenuItem>
         
         {/* Show Dashboard only if userType is "Admin" */}
-        {userType === "Admin" && (
-          <MenuItem onClick={() => handleMenuClick("/dashboard")}>Dashboard</MenuItem>
+        {userType === "Teacher" && (
+          <MenuItem onClick={() => handleMenuClick("/teacher")}>Dashboard</MenuItem>
         )}
 
         <MenuItem onClick={() => handleMenuClick("/homepage")}>Logout</MenuItem>

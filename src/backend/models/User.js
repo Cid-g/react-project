@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ROLES } = require("../UserType");
 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
@@ -7,12 +8,11 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   userType: { type: String,
-              enum: ['Admin', 'Manager'],
+              enum: Object.values(ROLES),
               required: true },
   sex: {type: String, enum: ['male', 'male'], default: null},            
   birthDate: {type: Date, default: null},
   yearLevel: {type: String,
-              enum: ['firstYear', 'secondYear', 'thirdYear', 'fourthYear', 'fifthYear' ],
               default: null},
   section: {type: String, default: null},
   course: {type: String, default: null}

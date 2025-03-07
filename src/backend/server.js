@@ -5,7 +5,8 @@ const dotenv = require("dotenv");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middleware/errorHandler");
-const profileRoutes = require ("./routes/profileRoutes")
+const profileRoutes = require ("./routes/profileRoutes");
+const errorHandler = require("./middleware/errorHandler");
 dotenv.config();
 
 const app = express();
@@ -24,6 +25,9 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoutes);
+
+// Global error handler 
+app.use(errorHandler);
 
 // Global Error Handler
 app.use(errorHandler);

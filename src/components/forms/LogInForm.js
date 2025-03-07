@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Stack, FormControl, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Button from "../ui/FormButton";
@@ -8,27 +8,22 @@ import CardWrapper from "../layout/CardWrapper";
 import ForgotPasswordButton from "../ui/ForgotPasswordButton";
 import { Link as RouterLink } from "react-router-dom";
 import Link from "@mui/material/Link";
-import { useState } from "react";
-import Select from "@mui/material/Select";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormHelperText from "@mui/material/FormHelperText";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ROLES } from "../../constants";
+import { useUser } from "../../context/UserContext";
 
 function LoginForm() {
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const [userTypeError, setUserTypeError] = useState(false);
-  const [userTypeErrorMessage, setUserTypeErrorMessage] = useState("");
 
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,12 +35,12 @@ function LoginForm() {
     }
 
     try {
-      console.log("Attempting login with:", { email, password, userType });
+      console.log("Attempting login with:", { email, password });
 
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, userType }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -53,9 +48,12 @@ function LoginForm() {
 
       if (response.ok) {
         toast.success("Login successful!", {
-          position: "top-right",
+          position: "center",
           autoClose: 2000,
         });
+
+        // Call login with user data, access token, refresh token, and expiration time
+        login(data.user, data.accessToken, data.refreshToken, data.expiresIn);
 
         if (!data.user || !data.user.userType) {
           console.error("User type is missing from API response!", data);
@@ -66,24 +64,27 @@ function LoginForm() {
           return;
         }
 
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userType", data.user.userType);
-        console.log("Stored userType in localStorage:", data.user.userType);
-
-        if (data.user.userType.toLowerCase() === "admin") {
-          console.log("Navigating to /admin");
-          navigate("/admin");
+        // Redirect based on userType
+        if (data.user.userType.toLowerCase() === ROLES.TEACHER.toLowerCase()) {
+          console.log("Navigating to /teacher");
+          navigate("/teacher");
+        } else if (data.user.userType.toLowerCase() === ROLES.STUDENT.toLowerCase()) {
+          console.log("Navigating to /student");
+          navigate("/student");
         } else {
-          console.log("Navigating to /user");
-          navigate("/user");
+          console.log("Navigating to /default");
+          toast.error("Invalid User");
         }
       } else {
         console.error("Login failed:", data.message);
-        toast.error(data.message );
+        toast.error(data.message, {
+          position: "top-right",
+          autoClose: 2000,
+        });
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Something went wrong" , {
+      toast.error("Something went wrong", {
         position: "top-right",
         autoClose: 2000,
       });
@@ -111,15 +112,6 @@ function LoginForm() {
       setPasswordErrorMessage("");
     }
 
-    if (!userType) {
-      setUserTypeError(true);
-      setUserTypeErrorMessage("Please select a user type.");
-      isValid = false;
-    } else {
-      setUserTypeError(false);
-      setUserTypeErrorMessage("");
-    }
-
     return isValid;
   };
 
@@ -130,23 +122,6 @@ function LoginForm() {
           <Typography variant="h1" sx={{ fontSize: "clamp(2.5rem, 15vw, 3rem)" }}>
             Sign in
           </Typography>
-
-          {/* Fixed User Type Select */}
-          <FormControl error={userTypeError}>
-            <InputLabel id="user-type-label">User Type</InputLabel>
-            <Select
-              labelId="user-type-label"
-              id="user-type"
-              value={userType}
-              onChange={(e) => setUserType(e.target.value)}
-              color={userTypeError ? "error" : "primary"}
-              label="User Type"
-            >
-              <MenuItem value="Admin">Admin</MenuItem>
-              <MenuItem value="Manager">Manager</MenuItem>
-            </Select>
-            {userTypeError && <FormHelperText>{userTypeErrorMessage}</FormHelperText>}
-          </FormControl>
 
           <FormControl>
             <InputField

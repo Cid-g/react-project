@@ -56,7 +56,7 @@ function UserHeader() {
     <Header>
       <Toolbar>
         <HamburgerMenu />
-        <Logo to={user?.userType === "Admin" ? "/admin" : "/user"} />
+        <Logo to={user?.userType === "Teacher" ? "/teacher" : "/user"} />
         <Typography variant="h6" style={{ marginRight: "16px" }}>
           Welcome, {user.firstName}
         </Typography>

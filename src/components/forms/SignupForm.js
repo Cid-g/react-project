@@ -1,20 +1,17 @@
-import { Stack, Typography, FormControl } from "@mui/material";
-import CardWrapper from "../layout/CardWrapper.js";
-import RootContainer from "../layout/RootContainer.js";
-import InputField from "../ui/InputField.js";
-import FormsButton from "../ui/FormButton.js";
+import React, { useState } from "react";
+import { Stack, Typography, FormControl, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import CardWrapper from "../layout/CardWrapper";
+import RootContainer from "../layout/RootContainer";
+import InputField from "../ui/InputField";
+import FormsButton from "../ui/FormButton";
 import Link from "@mui/material/Link";
 import { Link as RouterLink } from "react-router-dom";
-import { useState } from "react";
-import Box from "@mui/material/Box";
-import * as React from 'react';
-import { useNavigate } from "react-router-dom"; 
-import Select from '@mui/material/Select';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from "@mui/material/MenuItem";
-import { ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ROLES } from "../../constants";
+import Box from "@mui/material/Box";
+import FormHelperText from "@mui/material/FormHelperText";
 
 function SignupForm() {
   const [firstname, setFirstname] = useState("");
@@ -24,7 +21,7 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [userType, setUserType] = useState("");
- 
+
   const [nameError, setNameError] = useState(false);
   const [nameErrorMessage, setNameErrorMessage] = useState("");
   const [emailError, setEmailError] = useState(false);
@@ -33,12 +30,13 @@ function SignupForm() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState([]);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = useState("");
-  const [userTypeError, setUserTypeError] =useState(false);
+  const [userTypeError, setUserTypeError] = useState(false);
   const [userTypeErrorMessage, setUserTypeErrorMessage] = useState("");
+
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
 
     let isValid = true;
     let passwordErrors = [];
@@ -54,7 +52,7 @@ function SignupForm() {
     setPasswordErrorMessage([]);
     setConfirmPasswordErrorMessage("");
     setUserTypeError(false);
-    setUserTypeErrorMessage('');
+    setUserTypeErrorMessage("");
 
     // Full Name validation
     if (!firstname.trim() && !middlename.trim() && lastname.trim()) {
@@ -94,9 +92,10 @@ function SignupForm() {
       setPasswordErrorMessage(passwordErrors);
       isValid = false;
     }
-    if (userType ===''){
+
+    if (!userType) {
       setUserTypeError(true);
-      setUserTypeErrorMessage('⚠️ User Type is required.')
+      setUserTypeErrorMessage("⚠️ User Type is required.");
       isValid = false;
     }
 
@@ -106,7 +105,7 @@ function SignupForm() {
     }
 
     try {
-      console.log("Sending signup request to:", "http://localhost:5000/api/auth/signup"); // Debug log
+      console.log("Sending signup request to:", "http://localhost:5000/api/auth/signup");
       const response = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
         headers: {
@@ -122,24 +121,30 @@ function SignupForm() {
         }),
       });
 
-      console.log("Response status:", response.status); // Debug log
+      console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("Response data:", data); // Debug log
+      console.log("Response data:", data);
 
       if (response.ok) {
         console.log("Signup successful:", data);
-         toast.success("Sign up successful!", {
-                  position: "top-right",
-                  autoClose: 2000,
-                });
+        toast.success("Sign up successful!", {
+          position: "top-right",
+          autoClose: 2000,
+        });
         navigate("/login");
       } else {
         console.error("Signup failed:", data.message);
-        alert(data.message);
+        toast.error(data.message, {
+          position: "top-right",
+          autoClose: 2000,
+        });
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Something went wrong");
+      toast.error("Something went wrong", {
+        position: "top-right",
+        autoClose: 2000,
+      });
     }
   };
 
@@ -151,6 +156,25 @@ function SignupForm() {
             <Typography variant="h4" sx={{ fontSize: "clamp(2rem, 10vw, 2.15rem)" }}>
               Sign up
             </Typography>
+
+            
+            <FormControl error={userTypeError}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                User Type
+              </Typography>
+              <RadioGroup
+                row
+                value={userType}
+                onChange={(e) => setUserType(e.target.value)}
+              >
+                <FormControlLabel value={ROLES.TEACHER} control={<Radio />} label="Teacher" />
+                <FormControlLabel value={ROLES.STUDENT} control={<Radio />} label="Student" />
+              </RadioGroup>
+              {userTypeError && (
+                <FormHelperText sx={{ color: "red" }}>{userTypeErrorMessage}</FormHelperText>
+              )}
+            </FormControl>
+
 
             <FormControl>
               <InputField
@@ -164,11 +188,11 @@ function SignupForm() {
                 color={nameError ? "error" : "primary"}
               />
             </FormControl>
+
             <FormControl>
               <InputField
                 type="text"
                 label="Middle Name"
-                
                 value={middlename}
                 onChange={(e) => setMiddlename(e.target.value)}
                 error={nameError}
@@ -176,6 +200,7 @@ function SignupForm() {
                 color={nameError ? "error" : "primary"}
               />
             </FormControl>
+
             <FormControl>
               <InputField
                 type="text"
@@ -187,23 +212,6 @@ function SignupForm() {
                 helpertext={nameErrorMessage}
                 color={nameError ? "error" : "primary"}
               />
-            </FormControl>
-            <FormControl>
-              <InputLabel id="demo-simple-select-label">User Type</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={userType}
-                      label="User Type"
-                      onChange={(e) => setUserType(e.target.value)}
-                      error = {userTypeError}
-                      helperText = {userTypeErrorMessage}
-                      color= {userTypeError ? "error" : "primary"}
-                    >
-                <MenuItem value={"Admin"}>Admin</MenuItem>
-                <MenuItem value={"Manager"}>Manager</MenuItem>
-        
-               </Select>
             </FormControl>
 
             <FormControl>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from "@mui/material";
 
-const UserTable = () => {
+const StudentTable = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,10 +50,8 @@ const UserTable = () => {
             <TableCell>First Name</TableCell>
             <TableCell>Middle Name</TableCell>
             <TableCell>Last Name</TableCell>
-            <TableCell>Year Level</TableCell>
-            <TableCell>Course</TableCell>
-            <TableCell>Section</TableCell>
-            
+            <TableCell>Email</TableCell>
+            <TableCell>User Type</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -62,9 +60,8 @@ const UserTable = () => {
               <TableCell>{user.firstName}</TableCell>
               <TableCell>{user.middleName}</TableCell>
               <TableCell>{user.lastName}</TableCell>
-              <TableCell>{user.yearLevel}</TableCell>
-              <TableCell>{user.course}</TableCell>
-              <TableCell>{user.section}</TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.userType}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -73,4 +70,4 @@ const UserTable = () => {
   );
 };
 
-export default UserTable;
+export default StudentTable;

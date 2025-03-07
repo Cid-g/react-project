@@ -4,7 +4,7 @@ import UserHeader from "../components/ui/UserHeader";
 
 
 
-function UserPage() {
+function StudentPage() {
 
 
   return (
@@ -14,4 +14,4 @@ function UserPage() {
   );
 }
 
-export default UserPage;
+export default StudentPage;
