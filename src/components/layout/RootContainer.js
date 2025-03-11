@@ -1,20 +1,12 @@
-import { styled } from "@mui/system";
+import React from "react";
+import { Box } from "@mui/material";
 
-const RootContainer = styled("div")(({ theme }) => ({
-  minHeight: "100vh",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  padding: "20px",
-  paddingTop: "64px",
-  background: "radial-gradient(ellipse at 50% 50%, hsl(210, 36%, 92%), hsl(0, 40%, 94%))",
-  overflowY: "auto", // Enables scrolling when content exceeds viewport height
-  transition: "all 0.3s ease-in-out",
-
-  [theme.breakpoints.down("md")]: {
-    padding: "10px", // Adjusts spacing for smaller screens
-    paddingTop: "50px",
-  },
-}));
+function RootContainer({ children }) {
+  return (
+    <Box sx={{ width: "100%", height: "100%" }}>
+      {children}
+    </Box>
+  );
+}
 
 export default RootContainer;

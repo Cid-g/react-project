@@ -1,19 +1,30 @@
-import React from "react";
-import RootContainer from "../components/layout/RootContainer";
-import UserHeader from "../components/ui/UserHeader";
-import StudentTable from "../components/ui/Students.Table";
+import React, { useState } from 'react';
+import UserHeader from '../components/ui/UserHeader';
+import MainLayout from '../components/layout/MainLayout';
+import PageContainer from '../components/layout/PageContainer';
+import StudentTable from '../components/ui/Students.Table'
+import SlideMenu from '../components/ui/Menu';
+import Slidebar from '../components/ui/Sidebar'
 
 
-function TeacherDashboardPage() {
 
+export default function TeacherDashboardPage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <RootContainer>
-      <UserHeader />
-      
-    <StudentTable />
-    </RootContainer>
+    <>
+      <UserHeader 
+        isMenuOpen={isMenuOpen} 
+        onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} 
+      />
+      <SlideMenu isMenuOpen={isMenuOpen} />
+      <MainLayout isMenuOpen={isMenuOpen}>
+        <PageContainer>
+         <StudentTable />
+        
+        </PageContainer>
+       
+      </MainLayout>
+    </>
   );
 }
-
-export default TeacherDashboardPage;

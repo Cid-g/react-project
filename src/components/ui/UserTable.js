@@ -8,8 +8,7 @@ const UserTable = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("users")); // Assuming you store user details in localStorage
-
+      const user = JSON.parse(localStorage.getItem("users")); 
       try {
         const response = await fetch("http://localhost:5000/api/users/users", {
           method: "GET",

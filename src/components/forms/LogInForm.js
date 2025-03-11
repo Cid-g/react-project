@@ -105,7 +105,7 @@ function LoginForm() {
 
     if (!password || password.length < 6) {
       setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters.");
+      setPasswordErrorMessage("Invalid Password");
       isValid = false;
     } else {
       setPasswordError(false);

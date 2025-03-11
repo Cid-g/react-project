@@ -19,6 +19,7 @@
     "crypto-browserify": "^3.12.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "framer-motion": "^12.4.11",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.11.0",
     "os-browserify": "^0.3.0",

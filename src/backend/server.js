@@ -6,7 +6,6 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const profileRoutes = require ("./routes/profileRoutes");
-const errorHandler = require("./middleware/errorHandler");
 dotenv.config();
 
 const app = express();
@@ -27,9 +26,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoutes);
 
 // Global error handler 
-app.use(errorHandler);
-
-// Global Error Handler
 app.use(errorHandler);
 
 // Start server

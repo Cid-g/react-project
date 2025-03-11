@@ -1,11 +1,12 @@
+// src/components/ui/UserHeader.js
 import React, { useEffect, useState } from "react";
-import Header from "../layout/HeaderWrapper.js";
-import ProfileAvatar from "./ProfileAvatar.js";
+import BaseHeader from "../layout/HeaderWrapper";
+import ProfileAvatar from "./ProfileAvatar";
 import Logo from "./Logo";
-import { Toolbar, Typography } from "@mui/material";
-import HamburgerMenu from "./Menu.js";
+import { IconButton, Typography, Box } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 
-function UserHeader() {
+function UserHeader({ isMenuOpen, onMenuToggle }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,16 +15,11 @@ function UserHeader() {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
 
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        const response = await fetch("http://localhost:5000/api/auth/user", {
+        const response = await fetch("http://localhost:5000/api/auth/users", {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!response.ok) {
@@ -53,16 +49,32 @@ function UserHeader() {
   if (error) return <Typography variant="h6">Error: {error}</Typography>;
 
   return (
-    <Header>
-      <Toolbar>
-        <HamburgerMenu />
+    <BaseHeader
+    isMenuOpen={isMenuOpen}  
+    onMenuToggle={onMenuToggle}>
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        onClick={onMenuToggle} 
+        edge="start"
+        sx={{ marginRight: 5 }}
+      >
+        <MenuIcon />
+      </IconButton>
+      
+      <Box sx={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center' 
+      }}>
         <Logo to={user?.userType === "Teacher" ? "/teacher" : "/user"} />
-        <Typography variant="h6" style={{ marginRight: "16px" }}>
-          Welcome, {user.firstName}
-        </Typography>
-        <ProfileAvatar userType={user.userType} />
-      </Toolbar>
-    </Header>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          <Typography variant="h6">Welcome, {user.firstName}</Typography>
+          <ProfileAvatar userType={user.userType} />
+        </Box>
+      </Box>
+    </BaseHeader>
   );
 }
 

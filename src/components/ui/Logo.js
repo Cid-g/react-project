@@ -1,21 +1,25 @@
-
-import Typography from "@mui/material/Typography";
 import { styled } from "@mui/system";
 import { Link } from "react-router-dom";
+import logoImage from "../../assets/Tarlac_Agricultural_University_logo.png"; 
 
+const LogoContainer = styled(Link)({
+  display: "flex",
+  alignItems: "center",
+  textDecoration: "none",
+});
 
+const LogoImage = styled("img")({
+  height: "70px", // Adjust size as needed
+  width: "auto",
+  cursor: "pointer",
+});
 
-    const LogoText = styled(Typography)({
-        flexGrow: 1,
-        fontSize: "1.7rem",
-        fontWeight: "bold",
-        color: "red",
-        textTransform: "uppercase",
-        letterSpacing: "2px",
-        cursor: 'pointer',
-      });
-      function Logo({to = "/"}){
-      return  <LogoText component={Link} to={to} >CED</LogoText>
-
+function Logo({ to = "/" }) {
+  return (
+    <LogoContainer to={to}>
+      <LogoImage src={logoImage} alt="Logo" />
+    </LogoContainer>
+  );
 }
+
 export default Logo;

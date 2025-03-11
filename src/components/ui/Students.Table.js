@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from "@mui/material"; 
 
 const StudentTable = () => {
   const [users, setUsers] = useState([]);
@@ -8,7 +8,6 @@ const StudentTable = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("users")); // Assuming you store user details in localStorage
 
       try {
         const response = await fetch("http://localhost:5000/api/users/users", {
@@ -43,7 +42,7 @@ const StudentTable = () => {
   }
 
   return (
-    <TableContainer component={Paper}  sx={{pt: 10}}>
+    <TableContainer component={Paper}  sx={{pt: 0}}>
       <Table >
         <TableHead >
           <TableRow>
@@ -52,6 +51,7 @@ const StudentTable = () => {
             <TableCell>Last Name</TableCell>
             <TableCell>Email</TableCell>
             <TableCell>User Type</TableCell>
+            
           </TableRow>
         </TableHead>
         <TableBody>
