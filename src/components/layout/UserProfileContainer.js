@@ -13,7 +13,7 @@ const ProfileContainer = styled(Box)(({ theme }) => ({
   position: "relative", // Allows it to be placed properly inside its parent
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
+  alignItems: "start",
   justifyContent: "flex-start",
   overflow: "hidden", // Prevents unwanted scrollbars
   transition: "all 0.3s ease-in-out",

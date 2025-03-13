@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import UserHeader from '../components/ui/UserHeader';
 import MainLayout from '../components/layout/MainLayout';
 import PageContainer from '../components/layout/PageContainer';
-import StudentTable from '../components/ui/Students.Table'
+
 import SlideMenu from '../components/ui/Menu';
-import Slidebar from '../components/ui/Sidebar'
 
 
 
-export default function StudentPage() {
+
+export default function SettingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -20,7 +20,7 @@ export default function StudentPage() {
       <SlideMenu isMenuOpen={isMenuOpen} />
       <MainLayout isMenuOpen={isMenuOpen}>
         <PageContainer>
-         <StudentTable />
+            
         
         </PageContainer>
        

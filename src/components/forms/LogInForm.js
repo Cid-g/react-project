@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ROLES } from "../../constants";
 import { useUser } from "../../context/UserContext";
+import { authFetch } from '../../utils/api';
 
 function LoginForm() {
   const [emailError, setEmailError] = useState(false);
@@ -25,8 +26,11 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     // Validate inputs before making an API call
     if (!validateInputs()) {
@@ -37,7 +41,7 @@ function LoginForm() {
     try {
       console.log("Attempting login with:", { email, password });
 
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await authFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -88,6 +92,13 @@ function LoginForm() {
         position: "top-right",
         autoClose: 2000,
       });
+      if (!navigator.onLine) {
+        toast.error("No internet connection");
+      } else {
+        toast.error("Something went wrong");
+      }
+    }finally {
+      setIsLoading(false);
     }
   };
 
@@ -117,7 +128,7 @@ function LoginForm() {
 
   return (
     <RootContainer>
-      <CardWrapper>
+      <CardWrapper maxWidth={'350px'}>
         <Stack spacing={4} component="form" onSubmit={handleLogin}>
           <Typography variant="h1" sx={{ fontSize: "clamp(2.5rem, 15vw, 3rem)" }}>
             Sign in

@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const Admin = require("../models/Admin")
+const Admin = require("../models/Admin");
 
 // Create a new user
 const createUser = async (userData) => {

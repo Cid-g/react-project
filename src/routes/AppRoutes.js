@@ -15,7 +15,10 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TeacherDashboardPage from "../pages/TeacherDashboardPage.js";
 import AdminLoginPage from "../pages/AdminLoginPage.js";
+import SettingPage from "../pages/SettingPage.js";
 import { ROLES } from "../constants.js";
+import StudentsList from "../pages/StudentsList.js";
+
 function AppRoutes() {
   return (
     <>
@@ -61,8 +64,10 @@ function AppRoutes() {
         /> 
       
         <Route path ='/dashboard' element={<AdminDashboardPage/>}/>
+
+        <Route path = '/setting' element={<SettingPage />}/>
         
-       
+        <Route path = '/lists' element={<StudentsList />} />
     </Routes>
     <ToastContainer />
     </>

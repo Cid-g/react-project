@@ -4,7 +4,16 @@ import './index.css';
 import App from './App.js';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
+import { Buffer } from 'buffer';
+import process from 'process';
 
+window.Buffer = Buffer;
+window.process = process;
+if (typeof process === 'undefined') {
+  window.process = require('process/browser');
+} else {
+  window.process = process;
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

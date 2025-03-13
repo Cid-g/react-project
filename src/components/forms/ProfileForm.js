@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { 
   Box, IconButton, Typography, TextField, Button, FormLabel, FormControl, 
-  RadioGroup, FormControlLabel, Radio, Select, MenuItem 
+  RadioGroup, FormControlLabel, Radio, Select, MenuItem, Avatar
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import UserProfileContainer from "../layout/UserProfileContainer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 
 function ProfileForm() {
   const [editOpen, setEditOpen] = useState(false);
@@ -22,20 +21,46 @@ function ProfileForm() {
     course: "",
     yearLevel: "",
     section: "",
+    college: "",
   });
 
-  // Available courses in the Philippines
-  const availableCourses = [
-    "BS Information Technology", "BS Computer Science", "BS Business Administration",
-    "BS Accountancy", "BS Psychology", "BS Civil Engineering", "BS Electrical Engineering",
-    "BS Mechanical Engineering", "BS Nursing", "BS Architecture", "BS Education",
-    "BS Hospitality Management", "BS Tourism Management"
+  const availableCourses = {
+    "College of Engineering and Technology": [
+      "BS Information Technology",
+      "BS Computer Science",
+      "BS Civil Engineering",
+      "BS Electrical Engineering",
+      "BS Mechanical Engineering"
+    ],
+    "College of Arts and Sciences": [
+      "BS Psychology",
+      "BS Education"
+    ],
+    "College of Business and Management": [
+      "BS Business Administration",
+      "BS Accountancy",
+      "BS Hospitality Management",
+      "BS Tourism Management"
+    ],
+    "College of Agriculture and Forestry": [
+      "BS Agriculture",
+      "BS Forestry",
+      "BS Environmental Science",
+      "BS Food Technology"
+    ]
+  };
+  
+  const colleges = [
+    "College of Engineering and Technology", 
+    "College of Art And Science",
+    "College of Business and Management",
+    "College of Agriculture and Forestry"
   ];
 
-  // Year Level Options
   const yearLevels = [
     "First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year", "Sixth Year"
   ];
+  const sections = ["A", "B", "C", "D", "E"];
 
   // Fetch profile data
   useEffect(() => {
@@ -59,6 +84,7 @@ function ProfileForm() {
           course: data.course || "",
           yearLevel: data.yearLevel || "",
           section: data.section || "",
+          college: data.college || "",
         });
       } catch (error) {
         console.error(error);
@@ -71,16 +97,51 @@ function ProfileForm() {
     fetchProfile();
   }, []);
 
-  // Handle form input changes
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+  
+    // Add client-side validation
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+  
+    try {
+      const formData = new FormData();
+      formData.append('profilePicture', file); // Must match multer field name
+  
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/profile/upload-profile-picture', {
+        method: 'PATCH', // Verify endpoint matches backend route
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+  
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+  
+      // Update state
+      setUser(prev => ({...prev, profilePicture: data.data.profilePicture }));
+      toast.success('Profile picture updated!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'Failed to update profile picture');
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:5000/api/profile", {
@@ -109,12 +170,38 @@ function ProfileForm() {
 
   return (
     <UserProfileContainer>
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography variant="h4" sx={{ mt: 1, fontWeight: "bold" }}>
+      <Typography variant="h3">Profile</Typography>
+      <br />
+      <Typography variant="h6">Profile Picture</Typography>
+      
+      <label htmlFor="avatar-upload">
+            <IconButton component="span">
+              <Avatar 
+                sx={{ width: 70, height: 70, cursor: 'pointer' }}
+                src={user?.profilePicture 
+                  ? `http://localhost:5000${user.profilePicture}`
+                  : '/default-avatar.png'
+                }
+              />
+            </IconButton>
+        </label>
+      <input
+        id="avatar-upload"
+        type="file"
+        hidden
+        accept="image/*"
+        onChange={handleAvatarUpload}
+      />
+
+      <Box sx={{ textAlign: "start", mt: 4 }}>
+        <Typography variant="p" sx={{ mt: 1, fontWeight: "bold" }}>
           {user.firstName} {user.middleName || ""} {user.lastName}
         </Typography>
         <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
-          {user.userType} | {user.yearLevel || "No year level"}, Section {user.section || "No section"}
+          {user.userType}
+          {user.userType === 'Student' && 
+            ` | ${user.yearLevel || "No year level"}, Section ${user.section || "No section"}`
+          }
         </Typography>
 
         <IconButton
@@ -125,7 +212,6 @@ function ProfileForm() {
         </IconButton>
       </Box>
 
-      {/* Edit Profile Dialog */}
       {editOpen && (
         <Box sx={{ mt: 4, p: 3, border: "1px solid #ccc", borderRadius: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -157,7 +243,6 @@ function ProfileForm() {
               sx={{ mb: 2 }}
             />
 
-            {/* Radio Group for Sex */}
             <FormControl fullWidth sx={{ mb: 2 }}>
               <FormLabel>Sex</FormLabel>
               <RadioGroup
@@ -182,46 +267,71 @@ function ProfileForm() {
               InputLabelProps={{ shrink: true }}
             />
 
-            {/* Select for Course */}
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <FormLabel>Course</FormLabel>
-              <Select
-                name="course"
-                value={formData.course}
-                onChange={handleInputChange}
-                displayEmpty
-              >
-                <MenuItem value="" disabled>Select Course</MenuItem>
-                {availableCourses.map((course, index) => (
-                  <MenuItem key={index} value={course}>{course}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {user.userType === 'Teacher' && (
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <FormLabel>College</FormLabel>
+                <Select
+                  name="college"
+                  value={formData.college}
+                  onChange={handleInputChange}
+                  displayEmpty
+                >
+                  <MenuItem value="" disabled>Select College</MenuItem>
+                  {colleges.map((college, index) => (
+                    <MenuItem key={index} value={college}>{college}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
-            {/* Select for Year Level */}
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <FormLabel>Year Level</FormLabel>
-              <Select
-                name="yearLevel"
-                value={formData.yearLevel}
-                onChange={handleInputChange}
-                displayEmpty
-              >
-                <MenuItem value="" disabled>Select Year Level</MenuItem>
-                {yearLevels.map((level, index) => (
-                  <MenuItem key={index} value={level}>{level}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {user.userType === 'Student' && (
+              <>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <FormLabel>Course</FormLabel>
+                  <Select
+                    name="course"
+                    value={formData.course}
+                    onChange={handleInputChange}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>Select Course</MenuItem>
+                    {availableCourses.map((course, index) => (
+                      <MenuItem key={index} value={course}>{course}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-            <TextField
-              label="Section"
-              name="section"
-              value={formData.section}
-              onChange={handleInputChange}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <FormLabel>Year Level</FormLabel>
+                  <Select
+                    name="yearLevel"
+                    value={formData.yearLevel}
+                    onChange={handleInputChange}
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>Select Year Level</MenuItem>
+                    {yearLevels.map((level, index) => (
+                      <MenuItem key={index} value={level}>{level}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                <FormLabel>Section</FormLabel>
+                <Select
+                  name="section"
+                  value={formData.sections}
+                  onChange={handleInputChange}
+                  displayEmpty
+                >
+                  <MenuItem value="" disabled>Select Section</MenuItem>
+                  {sections.map((sections, index) => (
+                    <MenuItem key={index} value={sections}>{sections}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              </>
+            )}
 
             <Button type="submit" variant="contained" color="primary">
               Save Changes

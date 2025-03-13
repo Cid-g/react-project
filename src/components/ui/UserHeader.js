@@ -30,10 +30,11 @@ function UserHeader({ isMenuOpen, onMenuToggle }) {
         if (!data.firstName || !data.userType) {
           throw new Error("Invalid user data received");
         }
-
+        localStorage.setItem('userType', data.userType);
         setUser(data);
       } catch (error) {
         console.error("Error fetching user data:", error);
+        localStorage.removeItem('userType');
         setError(error.message);
         localStorage.removeItem("token");
         window.location.href = "/login";
@@ -58,6 +59,7 @@ function UserHeader({ isMenuOpen, onMenuToggle }) {
         onClick={onMenuToggle} 
         edge="start"
         sx={{ marginRight: 5 }}
+        
       >
         <MenuIcon />
       </IconButton>
@@ -71,7 +73,7 @@ function UserHeader({ isMenuOpen, onMenuToggle }) {
         <Logo to={user?.userType === "Teacher" ? "/teacher" : "/user"} />
         <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
           <Typography variant="h6">Welcome, {user.firstName}</Typography>
-          <ProfileAvatar userType={user.userType} />
+          <ProfileAvatar userType={user.userType}  profilePicture={user.profilePicture} />
         </Box>
       </Box>
     </BaseHeader>

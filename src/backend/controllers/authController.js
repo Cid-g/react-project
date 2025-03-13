@@ -8,7 +8,12 @@ const AppError = require("../utils/AppError");
 
 // Signup
 const signup = catchAsync(async (req, res, next) => {
-  const { firstName, middleName, lastName, userType, email, password } = req.body;
+  const  { firstName, middleName,
+           lastName, userType,
+           email, password,
+           birthDate,sex,
+           yearLevel, section,
+           course, college} = req.body;
 
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
@@ -16,7 +21,10 @@ const signup = catchAsync(async (req, res, next) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);
-  const newUser = await createUser({ firstName, middleName, lastName, userType, email, password: hashedPassword });
+  const newUser = await createUser({  firstName, middleName, lastName,
+                                      userType, email,  birthDate,sex,
+                                      yearLevel, section,
+                                      course, college, password: hashedPassword });
 
   const token = jwt.sign({ email: newUser.email, id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
 
@@ -24,31 +32,33 @@ const signup = catchAsync(async (req, res, next) => {
 });
 
 // Login
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+const login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
 
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) return res.status(401).json({ message: "Invalid credentials" });
-
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    // Ensure only one save operation at a time
-    user.refreshTokens = [...user.refreshTokens, { token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }];
-    
-    await user.save(); // Save only once after all modifications
-
-    res.json({ user, accessToken, refreshToken, expiresIn: 3600 });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ message: "Internal server error" });
+  const existingUser = await findUserByEmail(email);
+  if (!existingUser) {
+    throw new AppError("User not found", 404);
   }
-};
 
+  const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
+  if (!isPasswordCorrect) {
+    throw new AppError("Invalid credentials", 401);
+  }
+
+  // Generate access & refresh tokens
+  const accessToken = generateAccessToken(existingUser);
+  const refreshToken = await generateRefreshToken(existingUser); // Store in DB
+
+  // Exclude password from response
+  const { password: _, ...userData } = existingUser.toObject();
+
+  res.status(200).json({
+    user: userData,
+    accessToken,
+    refreshToken,
+    expiresIn: 900, // 15 minutes
+  });
+});
 
 
 
@@ -64,25 +74,20 @@ const getUser = catchAsync(async (req, res, next) => {
 });
 
 
- const logout = async (req, res) => {
-  try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).json({ message: "No refresh token provided" });
+const logout = catchAsync(async (req, res) => {
+  const { refreshToken } = req.body;
+  
+  const result = await User.updateOne(
+    { "refreshTokens.token": refreshToken },
+    { $pull: { refreshTokens: { token: refreshToken } } }
+  );
 
-    // Remove refresh token from the database
-    const user = await User.findOne({ "refreshTokens.token": refreshToken });
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);
-    await user.save();
-
-    res.status(200).json({ message: "Logged out successfully" });
-  } catch (error) {
-    console.error("Logout error:", error);
-    res.status(500).json({ message: "Internal server error" });
+  if (result.modifiedCount === 0) {
+    throw new AppError("Token not found", 404);
   }
-};
+
+  res.status(204).send();
+});
 
 
 // Login admin
@@ -116,37 +121,32 @@ const adminLogin = catchAsync(async (req, res, next) => {
 // Refresh token endpoint logic
 const refreshToken = catchAsync(async (req, res, next) => {
   const { refreshToken } = req.body;
-  if (!refreshToken) {
-    throw new AppError("Refresh token is required", 401);
-  }
-
+  
+  // Add secret verification
   const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-  const user = await User.findById(decoded.id);
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
+  
+  // Verify token exists in DB
+  const user = await User.findOne({
+    'refreshTokens.token': refreshToken,
+    'refreshTokens.expiresAt': { $gt: new Date() }
+  });
 
-  // Check if the refresh token exists in the database
-  const storedToken = user.refreshTokens.find(rt => rt.token === refreshToken);
-  if (!storedToken) {
-    throw new AppError("Invalid refresh token", 403);
-  }
+  if (!user) throw new AppError("Invalid refresh token", 401);
 
   // Generate new tokens
   const newAccessToken = generateAccessToken(user);
   const newRefreshToken = await generateRefreshToken(user);
 
-  // Remove the old refresh token
-  user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);
+  // Remove ALL previous tokens for security
+  user.refreshTokens = user.refreshTokens.filter(rt => rt.token === refreshToken);
   await user.save();
 
   res.json({
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
-    expiresIn: 900, // 15 minutes
+    expiresIn: 900
   });
 });
-
 
 
 // Function to generate a new access token
@@ -161,20 +161,24 @@ const generateAccessToken = (user) => {
 // Function to generate a new refresh token
 const generateRefreshToken = async (user) => {
   const refreshToken = jwt.sign(
-    { id: user._id, email: user.email, userType: user.userType },
+    { id: user._id },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d" } // Token valid for 7 days
+    { expiresIn: "7d" }
   );
 
-  // Set expiration date for the refresh token
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
-
-  // Add refresh token to the database
-  user.refreshTokens.push({ token: refreshToken, expiresAt });
-
-  // Save the updated user document in MongoDB
-  await user.save();
+  // Remove oldest token if exceeding limit
+  await User.findByIdAndUpdate(
+    user._id,
+    {
+      $push: {
+        refreshTokens: {
+          $each: [{ token: refreshToken, expiresAt: new Date(Date.now() + 7*24*60*60*1000) }],
+          $sort: { createdAt: -1 },
+          $slice: 5
+        }
+      }
+    }
+  );
 
   return refreshToken;
 };

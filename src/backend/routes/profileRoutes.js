@@ -1,13 +1,21 @@
 const express = require("express");
-const { getProfile, updateProfile } = require("../controllers/profileController");
+const { getProfile, updateProfile, uploadProfilePicture} = require("../controllers/profileController");
 const { verifyToken } = require("../middleware/auth");
+const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
 // Fetch profile data
-router.get("/", verifyToken, getProfile); // Changed from "/profile" to "/"
+router.get("/", verifyToken, getProfile); 
 
 // Update profile data
-router.put("/", verifyToken, updateProfile); // Changed from "/profile" to "/"
+router.put("/", verifyToken, updateProfile); 
+
+router.patch(
+    '/upload-profile-picture',
+    verifyToken,
+    upload.single('profilePicture'),
+    uploadProfilePicture
+  );
 
 module.exports = router;

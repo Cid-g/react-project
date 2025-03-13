@@ -46,6 +46,7 @@ const UserTable = () => {
       <Table >
         <TableHead >
           <TableRow>
+            <TableCell>Profile Picture</TableCell>
             <TableCell>First Name</TableCell>
             <TableCell>Middle Name</TableCell>
             <TableCell>Last Name</TableCell>
@@ -58,6 +59,7 @@ const UserTable = () => {
         <TableBody>
           {users.map((user) => (
             <TableRow key={user._id}>
+              <TableCell></TableCell>
               <TableCell>{user.firstName}</TableCell>
               <TableCell>{user.middleName}</TableCell>
               <TableCell>{user.lastName}</TableCell>

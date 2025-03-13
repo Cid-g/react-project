@@ -8,7 +8,7 @@ import Slidebar from '../components/ui/Sidebar'
 
 
 
-export default function StudentPage() {
+export default function StudentsList() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -23,7 +23,7 @@ export default function StudentPage() {
          <StudentTable />
         
         </PageContainer>
-       
+        <Slidebar />
       </MainLayout>
     </>
   );
